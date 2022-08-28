@@ -1,0 +1,323 @@
+body{
+    margin: 0%;
+    font-family: sans-serif;
+}
+
+*{
+    box-sizing: border-box;
+}
+
+/* styling for the whole game container */
+section{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+/* styling for scrumble board */
+.board{
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    height: 80%;
+    align-items: center;
+    background-color: white;
+    gap: 0.35em;
+    padding: 0.5em;
+}
+/* styling for scrumble board row */
+.row{
+    display: flex;
+    width: 65%;
+    height: 2.2em;
+    gap: 0.35em;
+    align-items: center;
+    justify-content: center;
+    
+}
+/* styling for empty board box ********************************************************************************/
+.box{
+    cursor: pointer;
+    border-radius: 5px;
+    width: 2.2rem;
+    height: 100%;
+    background-color: lightgray;
+}
+
+/* styling for premium box */
+
+/* styling for tripple letter box */
+.trippleWordBox{
+    cursor: pointer;
+    border-radius: 5px;
+    width: 2.2rem;
+    height: 100%;
+    background-color: rgb(253, 27, 72);
+    font-weight: bold;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+/* styling for double word box */
+.doubleWordBox{
+    cursor: pointer;
+    border-radius: 5px;
+    width: 2.2rem;
+    height: 100%;
+    background-color: coral;
+    font-weight: bold;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+/* styling for double letter box*/
+.doubleletterBox{
+    cursor: pointer;
+    border-radius: 5px;
+    width: 2.2rem;
+    height: 100%;
+    background-color: lightblue;
+    font-weight: bold;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+/* styling for tripple letter box */
+.trippleletterBox{
+    cursor: pointer;
+    border-radius: 5px;
+    width: 2.2rem;
+    height: 100%;
+    background-color: rgb(24, 163, 209);
+    font-weight: bold;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+/* styling for middle box */
+.middleBox{
+    cursor: pointer;
+    border-radius: 5px;
+    width: 2.2rem;
+    height: 100%;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* styling for middle box star */
+.middleBoxDescriptionClass{
+    font-size: 2rem;
+    margin-bottom: 38px;
+}
+/* styling for filled board box******************************************************** */
+.filledBox{
+    position: relative;
+    cursor: pointer;
+    width: 2.2rem;
+    height: 100%;
+    transform: scale(1.05);
+    background-color: rgb(231, 231, 118);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: black;
+    border-radius: 8px;
+    outline: 0.1em solid white;
+    outline-offset:  -0.3em;
+}
+.filledBox span{
+    position: absolute;
+    font-size: 0.7rem;
+    bottom: 3px;
+    right: 6.8px;
+}
+/* styling for tripple letter box with tile*/
+.filledTrippleWordBoxBox{
+    position: relative;
+    cursor: pointer;
+    width: 2.2rem;
+    height: 100%;
+    transform: scale(1.05);
+    background-color: rgb(253, 27, 72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    border-radius: 8px;
+    outline: 0.1em solid white;
+    outline-offset:  -0.3em;
+}
+.filledTrippleWordBoxBox span{
+    position: absolute;
+    font-size: 0.8rem;
+    bottom: 3px;
+    right: 6.8px;
+}
+
+/* styling for double word box with tile*/
+.filledDoubleWordBox{
+    position: relative;
+    cursor: pointer;
+    width: 2.2rem;
+    height: 100%;
+    transform: scale(1.05);
+    background-color: coral;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    border-radius: 8px;
+    outline: 0.1em solid white;
+    outline-offset:  -0.3em;
+}
+.filledDoubleWordBox span{
+    position: absolute;
+    font-size: 0.8rem;
+    bottom: 3px;
+    right: 6.8px;
+}
+
+/* styling for double letter box with tile*/
+.filledDoubleLetterBox{
+    position: relative;
+    cursor: pointer;
+    width: 2.2rem;
+    height: 100%;
+    transform: scale(1.05);
+    background-color: lightblue;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: rgb(19, 18, 18);
+    border-radius: 8px;
+    outline: 0.1em solid white;
+    outline-offset:  -0.3em;
+}
+.filledDoubleLetterBox span{
+    position: absolute;
+    font-size: 0.8rem;
+    bottom: 3px;
+    right: 6.8px;
+}
+
+/* styling for double letter box with tile*/
+.filledTrippleLetterBox{
+    position: relative;
+    cursor: pointer;
+    width: 2.2rem;
+    height: 100%;
+    transform: scale(1.05);
+    background-color: rgb(24, 163, 209);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    border-radius: 8px;
+    outline: 0.1em solid white;
+    outline-offset:  -0.3em;
+}
+.filledTrippleLetterBox span{
+    position: absolute;
+    font-size: 0.8rem;
+    bottom: 3px;
+    right: 6.8px;
+}
+
+.blankBoardTile{
+    display: none;
+}
+/* styling for information-bar which holds the number of tiles left and total score *************************************************************/
+.informationBar{
+    background-color: lightgreen;
+    width: 100%;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+/* styling tiles holder */
+.tileLeft{
+    cursor: default;
+    font-size: 1.5em;
+    color: white;
+}
+
+/* styling total score div */
+.totalScore{
+    cursor: default;
+    display: flex;
+    font-size: 1.5em;
+    color: white;
+    gap: 0.7em;
+}
+
+/* styling rack for tiles */
+.rack{
+    width: 400px;
+    height: 65px;
+    background-color: blanchedalmond;
+    outline: 0.5em solid rgb(150, 64, 64);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+}
+
+/* styling for tiles in the rack **********************************************************************/
+.rackTile{
+    position: relative;
+    cursor: pointer;
+    width: 2.5rem;
+    height: 2.5rem;
+    background-color: rgb(231, 231, 118);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: black;
+    border-radius: 8px;
+    outline: 0.1em solid white;
+    outline-offset:  -0.3em;
+}
+.rackTileSpan{
+    position: absolute;
+    font-size: 0.8rem;
+    bottom: 3px;
+    right: 8px;
+}
+.blankTileSpan {
+    display: none;
+}
+/* styling for selected tile in the rack */
+.selectedRackTile{
+    position: relative;
+    cursor: pointer;
+    width: 2.5rem;
+    height: 2.5rem;
+    background-color: rgb(231, 231, 118);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: black;
+    border-radius: 8px;
+    outline: 0.3em solid rgb(185, 219, 240);
+    outline-offset:  -0.3em;
+}
