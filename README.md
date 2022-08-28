@@ -1,2 +1,2 @@
-#My Scrabble Game
-   my official scrabble project
+# My Scrabble Game
+my official scrabble project
