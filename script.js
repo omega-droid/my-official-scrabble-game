@@ -1,6 +1,11 @@
 const board = document.querySelector(".board")
 const showTileLeft = document.querySelector(".tileLeft")
 const rack = document.querySelector(".rack")
+const blankTileReplacementAndButtonHolder = document.querySelector(".blank-tileReplacements-button-Holder")
+const blankTileReplacementHolder = document.querySelector(".replacement-tiles-Holder")
+const doneSelectingReplacementTile = document.querySelector(".done-selecting-tile")
+const cancelReplacementButton = document.querySelector(".cancel-selecting-tile")
+const overLay = document.querySelector(".overLay")
 
 //container that holds the total tile
 let totalTile = [];
@@ -11,11 +16,16 @@ let racktile = [];
 //unique number for tile
 let uniqueTileNum = 0;
 //check if board box is empty or not
-let isTheBoardEmpty;
-//check if tile is selected
-let numberSelectedTile = 0;
+let isTileOnRackSelected;
 //store the index of tile selected
 let indexOfSelectedTile;
+//array that store replacement of blank tile
+let storeReplacementForBlankTile = [{letter: 'A', selected: false}, {letter: 'B', selected: false}, {letter: 'C', selected: false}, {letter: 'D', selected: false},
+{letter: 'E', selected: false}, {letter: 'F', selected: false}, {letter: 'G', selected: false}, {letter: 'H', selected: false}, {letter: 'I', selected: false}, 
+{letter: 'J', selected: false}, {letter: 'K', selected: false}, {letter: 'L', selected: false}, {letter: 'M', selected: false}, {letter: 'N', selected: false},
+{letter: 'O', selected: false}, {letter: 'P', selected: false}, {letter: 'Q', selected: false}, {letter: 'R', selected: false}, {letter: 'S', selected: false}, 
+{letter: 'T', selected: false}, {letter: 'V', selected: false}, {letter: 'W', selected: false}, {letter: 'X', selected: false}, {letter: 'Y', selected: false}, 
+{letter: 'Z', selected: false}]
 
 //creating tile holder
 createTotalTile()
@@ -133,6 +143,7 @@ function createBox() {
         `
     }).join("")
 }
+cancelReplacingTile()
 
 //auto refill rack when shouldRefillRack is true
 function refillRackWhenNewGameStart() {
@@ -161,7 +172,6 @@ function renderTileOnRack() {
     rack.innerHTML = racktile.map((tile, i) => {
         let classnameForTileInRack
         let classnameForTileInRackSpan = "rackTileSpan"
-
         if (tile.isClicked) {
             classnameForTileInRack = "selectedRackTile"
         }else{
@@ -192,17 +202,107 @@ function selectTileFromRack(index) {
 
 //function to check if board is empty to either remove or add tile
 function addAndRemoveTileOnBoard(row, column) {
-    checkIfBoardIsEmpty(row, column)
+    let isTheBoardEmpty;
+    //checking if board box is empty to either add or remove tile
+    if (boardFoundation[row][column] == null) {
+        isTheBoardEmpty = true
+    }else{
+        isTheBoardEmpty = false
+    }
+    //checking wheather to remove or add tile to box 
     if (isTheBoardEmpty == true) {
-        if (numberSelectedTile > 0) {
-            addTileToBoard(row, column)
+        if (isTileOnRackSelected) {
+            if (racktile[indexOfSelectedTile].point == 0 ) {
+                CreateReplaceBlankTileInRack()
+                //replace blank tile
+                confirmSelectedReplacementTile(row, column) 
+            }else {
+                addTileToBoard(row, column)
+            }
         }
     }else{
-        removeOrSwapTileFromBoard(row, column)
+        if (boardFoundation[row][column].point == 0 ) {
+            boardFoundation[row][column].letter = ""
+            removeOrSwapTileFromBoard(row, column)
+        }else{      
+            removeOrSwapTileFromBoard(row, column)
+        }
     }
     createBox()
     checkIfTileIsSelected()
 }
+//function to replace blank tile in rack 
+function CreateReplaceBlankTileInRack(){
+    displayReplacementHolder()
+    addingTileToReplacementHolder()
+}
+//function to confirm replacement tile
+function confirmSelectedReplacementTile(i, j){
+    doneSelectingReplacementTile.addEventListener('click', () => {
+        let isReplacementTileSelected = false
+        let replacingTileIndex
+        storeReplacementForBlankTile.forEach((tile, index) =>{
+            if (tile.selected == true) {
+                isReplacementTileSelected = true
+                replacingTileIndex = index
+            }
+        } )
+        if (isReplacementTileSelected) {
+            racktile[indexOfSelectedTile].letter = storeReplacementForBlankTile[replacingTileIndex].letter
+            addTileToBoard(i, j)
+            refreshReplacementTile()
+            createBox()
+            checkIfTileIsSelected()
+        }
+    })
+}
+//function to cancel replacement of tile
+function cancelReplacingTile(){
+    cancelReplacementButton.addEventListener("click", () => {
+        refreshReplacementTile()
+    }) 
+}
+//function to refresh replacement tile
+function refreshReplacementTile() {
+    storeReplacementForBlankTile.forEach(tile => {
+        tile.selected = false
+    })
+    removeReplacementHolder()
+}
+//function to remove replacement holder
+function removeReplacementHolder() {
+    overLay.classList.remove("active")
+    blankTileReplacementAndButtonHolder.classList.remove("active")
+}
+//function to display replacement holder
+function displayReplacementHolder() {
+    overLay.classList.add("active")
+    blankTileReplacementAndButtonHolder.classList.add("active")
+}
+//function to add tile to replacement holder
+function addingTileToReplacementHolder() {
+    blankTileReplacementHolder.innerHTML = storeReplacementForBlankTile.map((tile, index) => {
+        let classForReplacementTile
+        if(tile.selected == true){
+            classForReplacementTile = "replacement-tile-selected"
+        }else {
+            classForReplacementTile = "replacement-tile"
+        }
+
+        return `
+            <div class=${classForReplacementTile} onclick="selectReplacementTile(${index})">${tile.letter}</div>
+        `
+    }).join("")
+}
+//function to select a replacementTile
+function selectReplacementTile(i) {
+    storeReplacementForBlankTile.forEach(tile => {
+        tile.selected = false
+    })
+    storeReplacementForBlankTile[i].selected = true
+    addingTileToReplacementHolder()
+}
+
 //function to add tile from rack to board
 function addTileToBoard(i, j) {
     boardFoundation[i][j] = {...racktile[indexOfSelectedTile]}
@@ -211,7 +311,7 @@ function addTileToBoard(i, j) {
 }
 //function to remove tile from board to rack
 function removeOrSwapTileFromBoard(i, j) {
-    if (numberSelectedTile > 0) {
+    if (isTileOnRackSelected) {
         swapTile(i, j) 
     }else{
         removeTile(i, j)
@@ -229,21 +329,13 @@ function removeTile(i, j) {
     racktile.push({...boardFoundation[i][j], isClicked: false})
     boardFoundation[i][j] = null
 }
-//checking if board box is empty to either add or remove tile
-function checkIfBoardIsEmpty(row, column){
-    if (boardFoundation[row][column] == null) {
-        isTheBoardEmpty = true
-    }else{
-        isTheBoardEmpty = false
-    }
-}
 //function to check if a tile is selected
 function checkIfTileIsSelected() {
-    numberSelectedTile = 0
-    indexOfSelectedTile = undefined
+    isTileOnRackSelected = false
+    indexOfSelectedTile = null
     racktile.forEach((tile, i) => {
         if (tile.isClicked == true) {
-            numberSelectedTile++
+            isTileOnRackSelected = true
             indexOfSelectedTile = i
         }
     })
