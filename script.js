@@ -10,15 +10,13 @@ const overLay = document.querySelector(".overLay")
 //container that holds the total tile
 let totalTile = [];
 //to know when the rack should be refilled
-let shouldRefillRack = true;
+let refillRack = true;
 //an array of tile in the rack
 let racktile = [];
+//array to keep track of where was clicked on the board
+let currentBoardLocation = []
 //unique number for tile
 let uniqueTileNum = 0;
-//check if board box is empty or not
-let isTileOnRackSelected;
-//store the index of tile selected
-let indexOfSelectedTile;
 //array that store replacement of blank tile
 let storeReplacementForBlankTile = [{letter: 'A', selected: false}, {letter: 'B', selected: false}, {letter: 'C', selected: false}, {letter: 'D', selected: false},
 {letter: 'E', selected: false}, {letter: 'F', selected: false}, {letter: 'G', selected: false}, {letter: 'H', selected: false}, {letter: 'I', selected: false}, 
@@ -26,25 +24,6 @@ let storeReplacementForBlankTile = [{letter: 'A', selected: false}, {letter: 'B'
 {letter: 'O', selected: false}, {letter: 'P', selected: false}, {letter: 'Q', selected: false}, {letter: 'R', selected: false}, {letter: 'S', selected: false}, 
 {letter: 'T', selected: false}, {letter: 'V', selected: false}, {letter: 'W', selected: false}, {letter: 'X', selected: false}, {letter: 'Y', selected: false}, 
 {letter: 'Z', selected: false}]
-
-//creating tile holder
-createTotalTile()
-//render length of tile in total tile on showTile left
-renderShowTileLeft() 
-//auto refill rack when shouldRefillRack is true
-refillRackWhenNewGameStart()
-//creating the board
-//creating the foundation of the board
-boardFoundation = []
-for (let i = 0; i <= 14; i++) {
-   let array = []
-    for (let j = 0; j <= 14; j++) {
-        array.push(null)
-    } 
-    boardFoundation.push(array) 
-}
-//creating board for scrumble
-createBox()
 
 //function to create board for scrumble
 function createBox() {
@@ -143,10 +122,8 @@ function createBox() {
         `
     }).join("")
 }
-cancelReplacingTile()
-
 //auto refill rack when shouldRefillRack is true
-function refillRackWhenNewGameStart() {
+function refillRackWhenNewGameStart(shouldRefillRack) {
     if (shouldRefillRack) {
         while (racktile.length < 7) {
             let num = Math.floor(Math.random() * totalTile.length)
@@ -155,7 +132,6 @@ function refillRackWhenNewGameStart() {
             totalTile.splice(num, 1)
             uniqueTileNum++
         }
-        shouldRefillRack = false
         renderShowTileLeft() 
         renderTileOnRack()
     }
@@ -203,6 +179,10 @@ function selectTileFromRack(index) {
 //function to check if board is empty to either remove or add tile
 function addAndRemoveTileOnBoard(row, column) {
     let isTheBoardEmpty;
+    //check if tile is selected on rack
+    let isTileOnRackSelected = checkIfTileIsSelected()
+    //keeping track on where was clicked on the board
+    currentBoardLocation = [row, column]
     //checking if board box is empty to either add or remove tile
     if (boardFoundation[row][column] == null) {
         isTheBoardEmpty = true
@@ -212,10 +192,11 @@ function addAndRemoveTileOnBoard(row, column) {
     //checking wheather to remove or add tile to box 
     if (isTheBoardEmpty == true) {
         if (isTileOnRackSelected) {
+            //store the index of tile selected on rack
+            let indexOfSelectedTile = checkForSelectedTileIndex()
             if (racktile[indexOfSelectedTile].point == 0 ) {
                 CreateReplaceBlankTileInRack()
-                //replace blank tile
-                confirmSelectedReplacementTile(row, column) 
+                //replace blank tile 
             }else {
                 addTileToBoard(row, column)
             }
@@ -236,50 +217,19 @@ function CreateReplaceBlankTileInRack(){
     displayReplacementHolder()
     addingTileToReplacementHolder()
 }
-//function to confirm replacement tile
-function confirmSelectedReplacementTile(i, j){
-    doneSelectingReplacementTile.addEventListener('click', () => {
-        let isReplacementTileSelected = false
-        let replacingTileIndex
-        storeReplacementForBlankTile.forEach((tile, index) =>{
-            if (tile.selected == true) {
-                isReplacementTileSelected = true
-                replacingTileIndex = index
-            }
-        } )
-        if (isReplacementTileSelected) {
-            racktile[indexOfSelectedTile].letter = storeReplacementForBlankTile[replacingTileIndex].letter
-            addTileToBoard(i, j)
-            refreshReplacementTile()
-            createBox()
-            checkIfTileIsSelected()
-        }
-    })
-}
-//function to cancel replacement of tile
-function cancelReplacingTile(){
-    cancelReplacementButton.addEventListener("click", () => {
-        refreshReplacementTile()
-    }) 
-}
-//function to refresh replacement tile
-function refreshReplacementTile() {
+function refreshAndRemoveReplacementTile() {
     storeReplacementForBlankTile.forEach(tile => {
         tile.selected = false
     })
-    removeReplacementHolder()
-}
-//function to remove replacement holder
-function removeReplacementHolder() {
     overLay.classList.remove("active")
     blankTileReplacementAndButtonHolder.classList.remove("active")
+
 }
-//function to display replacement holder
 function displayReplacementHolder() {
     overLay.classList.add("active")
     blankTileReplacementAndButtonHolder.classList.add("active")
+
 }
-//function to add tile to replacement holder
 function addingTileToReplacementHolder() {
     blankTileReplacementHolder.innerHTML = storeReplacementForBlankTile.map((tile, index) => {
         let classForReplacementTile
@@ -294,7 +244,7 @@ function addingTileToReplacementHolder() {
         `
     }).join("")
 }
-//function to select a replacementTile
+
 function selectReplacementTile(i) {
     storeReplacementForBlankTile.forEach(tile => {
         tile.selected = false
@@ -303,14 +253,15 @@ function selectReplacementTile(i) {
     addingTileToReplacementHolder()
 }
 
-//function to add tile from rack to board
 function addTileToBoard(i, j) {
+    let indexOfSelectedTile = checkForSelectedTileIndex()
     boardFoundation[i][j] = {...racktile[indexOfSelectedTile]}
     racktile.splice(indexOfSelectedTile, 1)
     renderTileOnRack()
 }
-//function to remove tile from board to rack
+
 function removeOrSwapTileFromBoard(i, j) {
+    let isTileOnRackSelected = checkIfTileIsSelected()
     if (isTileOnRackSelected) {
         swapTile(i, j) 
     }else{
@@ -320,6 +271,7 @@ function removeOrSwapTileFromBoard(i, j) {
 }
 //function to swap tile on board
 function swapTile(i, j) {
+    let indexOfSelectedTile = checkForSelectedTileIndex()
     let holdingRackTile = {...racktile[indexOfSelectedTile]}
     racktile[indexOfSelectedTile] = {...boardFoundation[i][j], isClicked: false}
     boardFoundation[i][j] = holdingRackTile
@@ -329,17 +281,65 @@ function removeTile(i, j) {
     racktile.push({...boardFoundation[i][j], isClicked: false})
     boardFoundation[i][j] = null
 }
-//function to check if a tile is selected
-function checkIfTileIsSelected() {
-    isTileOnRackSelected = false
-    indexOfSelectedTile = null
+//function to check for the selected tile index on rack
+function checkForSelectedTileIndex() {
+    let getIndexOfSelectedTile = null
     racktile.forEach((tile, i) => {
         if (tile.isClicked == true) {
-            isTileOnRackSelected = true
-            indexOfSelectedTile = i
+            getIndexOfSelectedTile = i
         }
     })
+    return getIndexOfSelectedTile
 }
+//function to check if tile is selected on rack
+function checkIfTileIsSelected() {
+    let checkSelectedTile = false
+    racktile.forEach((tile) => {
+        if (tile.isClicked == true) {
+            checkSelectedTile = true
+        }
+    })
+    return checkSelectedTile
+
+}
+function doneReplacingBlankTilebuttonFun() {
+    let isReplacementTileSelected = false
+    let replacingTileIndex
+    let indexOfSelectedTile = checkForSelectedTileIndex()
+    storeReplacementForBlankTile.forEach((tile, index) =>{
+        if (tile.selected == true) {
+            isReplacementTileSelected = true
+            replacingTileIndex = index
+        }
+    } )
+    if (isReplacementTileSelected) {
+        racktile[indexOfSelectedTile].letter = storeReplacementForBlankTile[replacingTileIndex].letter
+        addTileToBoard(currentBoardLocation[0], currentBoardLocation[1])
+        refreshAndRemoveReplacementTile()
+        createBox()
+    }
+
+}
+
+createTotalTile()
+renderShowTileLeft() 
+refillRackWhenNewGameStart(refillRack)
+
+//creating the array to create the board
+boardFoundation = []
+for (let i = 0; i <= 14; i++) {
+   let array = []
+    for (let j = 0; j <= 14; j++) {
+        array.push(null)
+    } 
+    boardFoundation.push(array) 
+}
+createBox()
+
+doneSelectingReplacementTile.addEventListener('click', doneReplacingBlankTilebuttonFun)
+cancelReplacementButton.addEventListener("click", () => {
+    refreshAndRemoveReplacementTile()
+}) 
 
 //function to create tiles in total tiles
 function createTotalTile() {
