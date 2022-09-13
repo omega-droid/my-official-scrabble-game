@@ -1,3 +1,6 @@
+const start = document.querySelector(".start-button")
+const gameInterface = document.querySelector(".play-game")
+const landingPage = document.querySelector(".welcome-page")
 const board = document.querySelector(".board")
 const showTileLeft = document.querySelector(".tileLeft")
 const rack = document.querySelector(".rack")
@@ -6,7 +9,6 @@ const blankTileReplacementHolder = document.querySelector(".replacement-tiles-Ho
 const doneSelectingReplacementTile = document.querySelector(".done-selecting-tile")
 const cancelReplacementButton = document.querySelector(".cancel-selecting-tile")
 const overLay = document.querySelector(".overLay")
-
 //container that holds the total tile
 let totalTile = [];
 //to know when the rack should be refilled
@@ -24,13 +26,17 @@ let storeReplacementForBlankTile = [{letter: 'A', selected: false}, {letter: 'B'
 {letter: 'O', selected: false}, {letter: 'P', selected: false}, {letter: 'Q', selected: false}, {letter: 'R', selected: false}, {letter: 'S', selected: false}, 
 {letter: 'T', selected: false}, {letter: 'V', selected: false}, {letter: 'W', selected: false}, {letter: 'X', selected: false}, {letter: 'Y', selected: false}, 
 {letter: 'Z', selected: false}]
-
+start.addEventListener('click', ()=>{
+    gameInterface.classList.add('active')  
+    landingPage.classList.add('active')
+    game() 
+})
 //function to create board for scrumble
 function createBox() {
     board.innerHTML = boardFoundation.map((square, i) => {
         return `
             <div class="row">
-              ${
+            ${
                     square.map((box, j) => {
                         let boxClass = "box"
                         let boxDescription = ""
@@ -70,7 +76,7 @@ function createBox() {
                                 boxDescription = `${box.letter}`
                                 tilepoint = `${box.point}`
                             }
-                           
+                        
                         }else if (i == 1 && j == 5 | j == 9 || i == 5 && j == 1 | j == 5 | j == 9 | j == 13 ||
                             i == 9 && j == 1 | j == 5 | j == 9 | j == 13 || i == 13 && j == 5 | j == 9) {
                             if (box == null) {
@@ -107,13 +113,13 @@ function createBox() {
                             if (box.point == 0) {
                                 boxSpanClass = "blankBoardTile"
                             }else{
-                                boxSpanClass = ""
+                                boxSpanClass = "none"
                             }
                         }
                         return `
-                            <div class=${boxClass} onclick="addAndRemoveTileOnBoard(${i}, ${j})">
-                                <p class=${boxDecriptionClass}>${boxDescription}</p>
-                                <span class=${boxSpanClass}>${tilepoint}</span>
+                            <div class=${boxClass} data-row=${i} data-column=${j} data-id="bt">
+                                <p class=${boxDecriptionClass} data-row=${i} data-column=${j} data-id="bt">${boxDescription}</p>
+                                <span class=${boxSpanClass} data-row=${i} data-column=${j} data-id="bt">${tilepoint}</span>
                             </div>
                             `
                     }).join("")
@@ -141,7 +147,6 @@ function refillRackWhenNewGameStart(shouldRefillRack) {
 function renderShowTileLeft() {
     showTileLeft.innerHTML = `<h1>${totalTile.length} Tile Left</h1>`
 }
-
 //building rack*****************************
 //function to render tiles in rack
 function renderTileOnRack() {
@@ -159,13 +164,13 @@ function renderTileOnRack() {
             classnameForTileInRackSpan = "rackTileSpan"
         }
         return `
-            <div class=${classnameForTileInRack} onclick=(selectTileFromRack(${i}))>
-                ${tile.letter}<span class=${classnameForTileInRackSpan}>${tile.point}</span>
+            <div class=${classnameForTileInRack} data-id="rt" data-index=${i}>
+                ${tile.letter}
+                <span class=${classnameForTileInRackSpan} data-id="rt" data-index=${i}>${tile.point}</span>
             </div>
         `
     }).join("")
 }
-
 //function to select tile from rack
 function selectTileFromRack(index) {
     racktile.forEach(tile => {
@@ -175,13 +180,10 @@ function selectTileFromRack(index) {
     checkIfTileIsSelected()
     renderTileOnRack()
 }
-
 //function to check if board is empty to either remove or add tile
 function addAndRemoveTileOnBoard(row, column) {
     let isTheBoardEmpty;
-    //check if tile is selected on rack
     let isTileOnRackSelected = checkIfTileIsSelected()
-    //keeping track on where was clicked on the board
     currentBoardLocation = [row, column]
     //checking if board box is empty to either add or remove tile
     if (boardFoundation[row][column] == null) {
@@ -240,11 +242,10 @@ function addingTileToReplacementHolder() {
         }
 
         return `
-            <div class=${classForReplacementTile} onclick="selectReplacementTile(${index})">${tile.letter}</div>
+            <div class=${classForReplacementTile} id="rep" data-i=${index}>${tile.letter}</div>
         `
     }).join("")
 }
-
 function selectReplacementTile(i) {
     storeReplacementForBlankTile.forEach(tile => {
         tile.selected = false
@@ -320,27 +321,44 @@ function doneReplacingBlankTilebuttonFun() {
     }
 
 }
-
 createTotalTile()
 renderShowTileLeft() 
 refillRackWhenNewGameStart(refillRack)
-
 //creating the array to create the board
 boardFoundation = []
 for (let i = 0; i <= 14; i++) {
-   let array = []
+let array = []
     for (let j = 0; j <= 14; j++) {
         array.push(null)
     } 
     boardFoundation.push(array) 
 }
 createBox()
-
+board.addEventListener('click', (e)=>{
+    if (e.target.dataset.id == "bt") {
+        let row = parseInt(e.target.dataset.row)
+        let column = parseInt(e.target.dataset.column)
+        addAndRemoveTileOnBoard(row, column)   
+    } 
+})
+rack.addEventListener('click', (e)=>{
+    if (e.target.dataset.id == 'rt') {
+        let index = parseInt(e.target.dataset.index)
+        selectTileFromRack(index)   
+    }else {
+        return
+    }
+})
+blankTileReplacementHolder.addEventListener('click', (e)=>{
+    if (e.target.id == 'rep') {
+        let index = e.target.dataset.i
+        selectReplacementTile(index)   
+    }else{
+        return
+    }
+})
 doneSelectingReplacementTile.addEventListener('click', doneReplacingBlankTilebuttonFun)
-cancelReplacementButton.addEventListener("click", () => {
-    refreshAndRemoveReplacementTile()
-}) 
-
+cancelReplacementButton.addEventListener("click", () => { refreshAndRemoveReplacementTile() }) 
 //function to create tiles in total tiles
 function createTotalTile() {
     for (let i = 0; i < 9; i++) {
