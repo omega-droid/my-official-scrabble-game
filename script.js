@@ -1,6 +1,3 @@
-const start = document.querySelector(".start-button")
-const gameInterface = document.querySelector(".play-game")
-const landingPage = document.querySelector(".welcome-page")
 const board = document.querySelector(".board")
 const showTileLeft = document.querySelector(".tileLeft")
 const rack = document.querySelector(".rack")
@@ -26,11 +23,7 @@ let storeReplacementForBlankTile = [{letter: 'A', selected: false}, {letter: 'B'
 {letter: 'O', selected: false}, {letter: 'P', selected: false}, {letter: 'Q', selected: false}, {letter: 'R', selected: false}, {letter: 'S', selected: false}, 
 {letter: 'T', selected: false}, {letter: 'V', selected: false}, {letter: 'W', selected: false}, {letter: 'X', selected: false}, {letter: 'Y', selected: false}, 
 {letter: 'Z', selected: false}]
-start.addEventListener('click', ()=>{
-    gameInterface.classList.add('active')  
-    landingPage.classList.add('active')
-    game() 
-})
+
 //function to create board for scrumble
 function createBox() {
     board.innerHTML = boardFoundation.map((square, i) => {
@@ -361,191 +354,39 @@ doneSelectingReplacementTile.addEventListener('click', doneReplacingBlankTilebut
 cancelReplacementButton.addEventListener("click", () => { refreshAndRemoveReplacementTile() }) 
 //function to create tiles in total tiles
 function createTotalTile() {
-    for (let i = 0; i < 9; i++) {
-        const A =  {
-            letter: "A",
-            point: 1,
-            isClicked: false
-        }
-        const I =  {
-            letter: "I",
-            point: 1,
-            isClicked: false
-        }
-        totalTile.push(I, A)
+    for (let i = 0; i < 100; i++) {
+        totalTile.push(
+            {
+                letter: i < 9 ? 'A' : i >= 9 && i < 18 ? 'I' 
+                            : i >= 18 && i < 20 ? 'B' : i >= 20 && i < 22 ? 'C' 
+                                : i >= 22 && i < 26 ? 'D' : i >= 26 && i < 38 ? 'E' 
+                                    : i >= 38 && i < 40 ? 'F' : i >= 40 && i < 43 ? 'G' 
+                                        : i >= 43 && i < 45 ? 'H' : i >= 45 && i < 46 ? 'J' 
+                                            : i >= 46 && i < 47 ? 'K' : i >= 47 && i < 51 ? 'L' 
+                                                : i >= 51 && i < 53 ? 'M' : i >= 53 && i < 59 ? 'N'
+                                                    : i >= 59 && i < 67 ? 'O': i >= 67 && i < 69 ? 'P' 
+                                                        : i >= 69 && i < 70 ? 'Q' : i >= 70 && i < 76 ? 'R' 
+                                                            : i >= 76 && i < 80 ? 'S' : i >= 80 && i < 86 ? 'T'
+                                                                : i >= 86 && i < 89 ? 'U' : i >= 89 && i < 91 ? 'V'
+                                                                    : i >= 91 && i < 93 ? 'W' :i >= 93 && i < 94 ? 'X' 
+                                                                        : i >= 94 && i < 96 ? 'Y' : i >= 96 && i < 97 ? 'Z' : '',
+                point: i < 9 ? 1 : i >= 9 && i < 18 ? 1 
+                : i >= 18 && i < 20 ? 3 : i >= 20 && i < 22 ? 3 
+                    : i >= 22 && i < 26 ? 2 : i >= 26 && i < 38 ? 1 
+                        : i >= 38 && i < 40 ? 4 : i >= 40 && i < 43 ? 2
+                            : i >= 43 && i < 45 ? 4 : i >= 45 && i < 46 ? 8 
+                                : i >= 46 && i < 47 ? 5 : i >= 47 && i < 51 ? 1 
+                                    : i >= 51 && i < 53 ? 3 : i >= 53 && i < 59 ? 1
+                                        : i >= 59 && i < 67 ? 1: i >= 67 && i < 69 ? 3 
+                                            : i >= 69 && i < 70 ? 10 : i >= 70 && i < 76 ? 1
+                                                : i >= 76 && i < 80 ? 1 : i >= 80 && i < 86 ? 1
+                                                    : i >= 86 && i < 89 ? 1 : i >= 89 && i < 91 ? 4
+                                                        : i >= 91 && i < 93 ? 4 :i >= 93 && i < 94 ? 8 
+                                                            : i >= 94 && i < 96 ? 4 : i >= 96 && i < 97 ? 10 : 0,
+                isClicked: false
+            }
+        
+        )
     }
-
-    for (let i = 0; i < 3; i++) {
-        const G =  {
-            letter: "G",
-            point: 2,
-            isClicked: false
-        }
     
-        totalTile.push(G)
-    }
-
-    for (let i = 0; i < 8; i++) {
-        const O =  {
-            letter: "O",
-            point: 1,
-            isClicked: false
-        }
-    
-        totalTile.push(O)
-    }
-
-    for (let i = 0; i < 12; i++) {
-        const E =  {
-            letter: "E",
-            point: 1,
-            isClicked: false
-        }
-    
-        totalTile.push(E)
-    }
-
-
-    for (let i = 0; i < 2; i++) {
-        const B =  {
-            letter: "B",
-            point: 3,
-            isClicked: false
-        }
-
-        const C =  {
-            letter: "C",
-            point: 3,
-            isClicked: false
-        }
-
-        const H =  {
-            letter: "H",
-            point: 4,
-            isClicked: false
-        }
-        const F =  {
-            letter: "F",
-            point: 4,
-            isClicked: false
-        }
-
-        const V =  {
-            letter: "V",
-            point: 4,
-            isClicked: false
-        } 
-
-        const Y =  {
-            letter: "Y",
-            point: 4,
-            isClicked: false
-        }
-
-        const M =  {
-            letter: "M",
-            point: 3,
-            isClicked: false
-        }
-
-        const W =  {
-            letter: "W",
-            point: 4,
-            isClicked: false
-        }
-
-        const P =  {
-            letter: "P",
-            point: 3,
-            isClicked: false
-        }
-
-        const Blank =  {
-            letter: "",
-            point: 0,
-            isClicked: false
-        }
-
-        totalTile.push(B, H, C, Blank, P, W, F, M, Y, V)
-    }
-
-    for (let i = 0; i < 6; i++) {
-        const N  =  {
-            letter: "N",
-            point: 1,
-            isClicked: false
-        }
-        const R =  {
-            letter: "R",
-            point: 1,
-            isClicked: false
-        }
-
-        const T =  {
-            letter: "T",
-            point: 1,
-            isClicked: false
-        }
-        totalTile.push(N, R, T)
-    }
-
-    for (let i = 0; i < 4; i++) {
-        const D =  {
-            letter: "D",
-            point: 2,
-            isClicked: false
-        }
-        const L =  {
-            letter: "L",
-            point: 1,
-            isClicked: false
-        }
-
-        const S =  {
-            letter: "T",
-            point: 1,
-            isClicked: false
-        }
-
-        const U =  {
-            letter: "U",
-            point: 1,
-            isClicked: false
-        }
-        totalTile.push(D, L, S, U)
-    }
-
-
-    for (let i = 0; i < 1; i++) {
-        const K =  {
-            letter: "K",
-            point: 5,
-            isClicked: false
-        }
-        const X =  {
-            letter: "X",
-            point: 8,
-            isClicked: false
-        }
-
-        const J =  {
-            letter: "J",
-            point: 8,
-            isClicked: false
-        }
-
-        const Q =  {
-            letter: "Q",
-            point: 10,
-            isClicked: false
-        }
-
-        const Z =  {
-            letter: "Z",
-            point: 10,
-            isClicked: false
-        }
-
-        totalTile.push(K, X, J, Q, Z)
-    }
 }
