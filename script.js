@@ -6,16 +6,30 @@ const blankTileReplacementHolder = document.querySelector(".replacement-tiles-Ho
 const doneSelectingReplacementTile = document.querySelector(".done-selecting-tile")
 const cancelReplacementButton = document.querySelector(".cancel-selecting-tile")
 const overLay = document.querySelector(".overLay")
+const check = document.querySelector(".check-word")
 //container that holds the total tile
 let totalTile = [];
+
 //to know when the rack should be refilled
 let refillRack = true;
+
 //an array of tile in the rack
 let racktile = [];
+
 //array to keep track of where was clicked on the board
 let currentBoardLocation = []
+
 //unique number for tile
 let uniqueTileNum = 0;
+
+//variable for storing selected index position 
+let indextoreplaceboard
+
+let storeWords = []
+
+let storeBranchIndex = []
+
+
 //array that store replacement of blank tile
 let storeReplacementForBlankTile = [{letter: 'A', selected: false}, {letter: 'B', selected: false}, {letter: 'C', selected: false}, {letter: 'D', selected: false},
 {letter: 'E', selected: false}, {letter: 'F', selected: false}, {letter: 'G', selected: false}, {letter: 'H', selected: false}, {letter: 'I', selected: false}, 
@@ -140,6 +154,7 @@ function refillRackWhenNewGameStart(shouldRefillRack) {
 function renderShowTileLeft() {
     showTileLeft.innerHTML = `<h1>${totalTile.length} Tile Left</h1>`
 }
+
 //building rack*****************************
 //function to render tiles in rack
 function renderTileOnRack() {
@@ -164,6 +179,7 @@ function renderTileOnRack() {
         `
     }).join("")
 }
+
 //function to select tile from rack
 function selectTileFromRack(index) {
     racktile.forEach(tile => {
@@ -173,6 +189,7 @@ function selectTileFromRack(index) {
     checkIfTileIsSelected()
     renderTileOnRack()
 }
+
 //function to check if board is empty to either remove or add tile
 function addAndRemoveTileOnBoard(row, column) {
     let isTheBoardEmpty;
@@ -213,6 +230,9 @@ function CreateReplaceBlankTileInRack(){
     addingTileToReplacementHolder()
 }
 function refreshAndRemoveReplacementTile() {
+    if (indextoreplaceboard !== null) {
+        indextoreplaceboard = null
+    }
     storeReplacementForBlankTile.forEach(tile => {
         tile.selected = false
     })
@@ -225,6 +245,8 @@ function displayReplacementHolder() {
     blankTileReplacementAndButtonHolder.classList.add("active")
 
 }
+
+//function to create replacement tile selection card
 function addingTileToReplacementHolder() {
     blankTileReplacementHolder.innerHTML = storeReplacementForBlankTile.map((tile, index) => {
         let classForReplacementTile
@@ -257,12 +279,13 @@ function addTileToBoard(i, j) {
 function removeOrSwapTileFromBoard(i, j) {
     let isTileOnRackSelected = checkIfTileIsSelected()
     if (isTileOnRackSelected) {
-        swapTile(i, j) 
+        isBlankTile(i, j) 
     }else{
         removeTile(i, j)
     }
     renderTileOnRack()
 }
+
 //function to swap tile on board
 function swapTile(i, j) {
     let indexOfSelectedTile = checkForSelectedTileIndex()
@@ -270,6 +293,17 @@ function swapTile(i, j) {
     racktile[indexOfSelectedTile] = {...boardFoundation[i][j], isClicked: false}
     boardFoundation[i][j] = holdingRackTile
 }
+
+function isBlankTile(i, j) {
+    let indexOfSelectedTile = checkForSelectedTileIndex()
+    if (racktile[indexOfSelectedTile].point == 0) {
+        CreateReplaceBlankTileInRack()
+        indextoreplaceboard = [i, j]
+    }else{
+        swapTile(i, j)
+    }  
+}
+
 //function to remove tile
 function removeTile(i, j) {
     racktile.push({...boardFoundation[i][j], isClicked: false})
@@ -296,6 +330,7 @@ function checkIfTileIsSelected() {
     return checkSelectedTile
 
 }
+
 function doneReplacingBlankTilebuttonFun() {
     let isReplacementTileSelected = false
     let replacingTileIndex
@@ -308,17 +343,228 @@ function doneReplacingBlankTilebuttonFun() {
     } )
     if (isReplacementTileSelected) {
         racktile[indexOfSelectedTile].letter = storeReplacementForBlankTile[replacingTileIndex].letter
-        addTileToBoard(currentBoardLocation[0], currentBoardLocation[1])
+
+        if(indextoreplaceboard !== null && boardFoundation[indextoreplaceboard[0]][indextoreplaceboard[1]]){
+            swapTile(indextoreplaceboard[0], indextoreplaceboard[1])
+            renderTileOnRack()
+        }else{
+            addTileToBoard(currentBoardLocation[0], currentBoardLocation[1])
+        }
         refreshAndRemoveReplacementTile()
         createBox()
     }
 
 }
+
+//check whether tiles are correctly placed and calculate score****************************************
+function scanLeftRight(startPos, shouldCheckBranch) {
+    if (shouldCheckBranch) {
+        storeBranchIndex = []
+    }
+    let wordObj = {
+        word: '',
+        point: 0,
+        specialTile: 1
+    }
+
+    let left = ''
+    let right = ''
+    let currRow = startPos[0]
+    let currCol = startPos[1]
+    
+    if (boardFoundation[currRow][currCol+1] !== null) {
+        let startright = currCol+1
+        while (boardFoundation[currRow][startright] !== null && startright <= 14) {
+            right = right + boardFoundation[currRow][startright].letter
+            wordObj.point = wordObj.point + boardFoundation[currRow][startright].point
+ 
+            if (shouldCheckBranch && (boardFoundation[currRow][startright].isClicked == true && (boardFoundation[currRow-1][startright] !== null
+                 || boardFoundation[currRow+1][startright] !== null))) {
+                     storeBranchIndex.push([currRow, startright]) 
+            } 
+            
+            startright = startright + 1
+         }
+ 
+         
+    }
+
+    if (boardFoundation[currRow][currCol-1] !== null) {
+        let startleft = currCol-1
+        while (boardFoundation[currRow][startleft] !== null && startleft >= 0) {
+            left = boardFoundation[currRow][startleft].letter + left
+            wordObj.point = wordObj.point + boardFoundation[currRow][startleft].point
+ 
+            if (shouldCheckBranch == true && (boardFoundation[currRow][currCol].isClicked == true && (boardFoundation[currRow-1][startleft] !== null
+                 || boardFoundation[currRow+1][startleft] !== null))) {
+                     storeBranchIndex.push([currRow, startleft]) 
+            } 
+            
+            startleft = startleft - 1
+         }
+         
+    }
+
+    if (shouldCheckBranch == true && (boardFoundation[currRow-1][currCol] !== null || boardFoundation[currRow+1][currCol] !== null)) {
+        storeBranchIndex.push([currRow, currCol])
+    }
+
+    wordObj.word = left + boardFoundation[currRow][currCol].letter + right
+    wordObj.point += boardFoundation[currRow][currCol].point
+
+    storeWords.push(wordObj)
+
+    if (storeBranchIndex.length > 0 && shouldCheckBranch) {
+        let place
+        for (let i = 0; i < storeBranchIndex.length; i++) {
+            place = [storeBranchIndex[i][0], storeBranchIndex[i][1]]
+            scanTopBottom(place, false)
+        }
+    }
+    console.log(storeWords)
+}
+
+function scanTopBottom(startPos, shouldCheckBranch) {
+    if (shouldCheckBranch) {
+        storeBranchIndex = []
+    }
+    let wordObj = {
+        word: '',
+        point: 0,
+        specialTile: 1
+    }
+
+    let top = ''
+    let bottom = ''
+    let currRow = startPos[0]
+    let currCol = startPos[1]
+    
+    if (boardFoundation[currRow+1][currCol] !== null) {
+        let startbottom = currRow+1
+        while (boardFoundation[startbottom][currCol] !== null && startbottom <= 14) {
+            bottom = bottom + boardFoundation[startbottom][currCol].letter
+            wordObj.point = wordObj.point + boardFoundation[startbottom][currCol].point
+ 
+            if (shouldCheckBranch && (boardFoundation[startbottom][currCol].isClicked == true && (boardFoundation[startbottom][currCol-1] !== null
+                 || boardFoundation[startbottom][currCol+1] !== null))) {
+                     storeBranchIndex.push([startbottom, currCol]) 
+            } 
+            
+            startbottom = startbottom + 1
+         }
+    }
+
+    if (boardFoundation[currRow-1][currCol] !== null) {
+        let startTop = currRow-1
+        while (boardFoundation[startTop][currCol] !== null && startTop >= 0) {
+            top = boardFoundation[startTop][currCol].letter + top
+            wordObj.point = wordObj.point + boardFoundation[startTop][currCol].point
+ 
+            if ( shouldCheckBranch == true && (boardFoundation[startTop][currCol].isClicked == true && (boardFoundation[startTop][currCol-1] !== null
+                 || boardFoundation[startTop][currCol+1] !== null))) {
+                     storeBranchIndex.push([startTop, currCol]) 
+            } 
+            
+            startTop = startTop - 1
+         }
+         
+    }
+
+    if (shouldCheckBranch == true && (boardFoundation[currRow][currCol-1] !== null || boardFoundation[currRow][currCol+1] !== null)) {
+        storeBranchIndex.push([currRow, currCol])
+    }
+
+    wordObj.word = top + boardFoundation[currRow][currCol].letter + bottom
+    wordObj.point += boardFoundation[currRow][currCol].point
+    storeWords.push(wordObj)
+
+    if (storeBranchIndex.length > 0 && shouldCheckBranch) {
+        console.log('why')
+        let place
+        for (let i = 0; i < storeBranchIndex.length; i++) {
+            place = [storeBranchIndex[i][0], storeBranchIndex[i][1]]
+            scanLeftRight(place, false)
+        }
+    }
+
+    console.log(storeWords)
+    
+}
+
+
+
+//function to scan tile
+function scanTile(dir, startPos) {
+
+    if (dir == 'LR'){
+        scanLeftRight(startPos, true)  
+    }else{
+        scanTopBottom(startPos, true)
+    }
+    
+    refillRackWhenNewGameStart(refillRack)
+    for (let i = 0; i < boardFoundation.length; i++) {
+        for (let j = 0; j < boardFoundation[i].length; j++) {
+            if (boardFoundation[i][j] !== null && boardFoundation[i][j].isClicked == true) {
+                boardFoundation[i][j].isClicked = false
+            }
+    
+        }   
+    }
+}
+
+
+//check if tile a correctly placed
+function checkTiles() {
+    let isDirection = false
+    let direction
+    let startScanPos
+    let prevIndex = []
+
+    for (let i = 0; i < boardFoundation.length; i++) {
+        for (let j = 0; j < boardFoundation[i].length; j++) {
+            if (direction == 'LR' && boardFoundation[i][j] !== null && boardFoundation[i][j].isClicked == true) {
+                if (j - prevIndex[prevIndex.length-1] !== 1) {
+                    return
+                }
+                prevIndex.push(j)
+            }else if (direction == 'TD' && (boardFoundation[i][j] !== null && boardFoundation[i][j].isClicked == true)) {
+                if (j - prevIndex[prevIndex.length-1] !== 0) {
+                    console.log(direction)
+                    return
+                }
+                prevIndex.push(j)
+            }
+
+            if (boardFoundation[i][j] !== null && boardFoundation[i][j].isClicked == true && isDirection == false) {
+                if (boardFoundation[i][j+1] !== null && boardFoundation[i][j+1].isClicked == true) {
+                    direction = 'LR'
+                    prevIndex.push(j)
+                }else if (boardFoundation[i+1][j] !== null && boardFoundation[i+1][j].isClicked == true) {
+                    direction = 'TD'
+                    prevIndex.push(j)
+                }
+                startScanPos = [i, j]
+                isDirection = true
+            }
+    
+        }
+        
+    }
+    if (startScanPos == null) {
+       return 
+    }
+    scanTile(direction, startScanPos)
+}
+
+
+
 createTotalTile()
 renderShowTileLeft() 
 refillRackWhenNewGameStart(refillRack)
+
 //creating the array to create the board
-boardFoundation = []
+let boardFoundation = []
 for (let i = 0; i <= 14; i++) {
 let array = []
     for (let j = 0; j <= 14; j++) {
@@ -352,6 +598,9 @@ blankTileReplacementHolder.addEventListener('click', (e)=>{
 })
 doneSelectingReplacementTile.addEventListener('click', doneReplacingBlankTilebuttonFun)
 cancelReplacementButton.addEventListener("click", () => { refreshAndRemoveReplacementTile() }) 
+
+check.addEventListener('click', checkTiles)
+
 //function to create tiles in total tiles
 function createTotalTile() {
     for (let i = 0; i < 100; i++) {
@@ -390,3 +639,5 @@ function createTotalTile() {
     }
     
 }
+
+
