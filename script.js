@@ -214,10 +214,10 @@ function addAndRemoveTileOnBoard(row, column) {
             }
         }
     }else{
-        if (boardFoundation[row][column].point == 0 ) {
+        if (boardFoundation[row][column].point == 0 && boardFoundation[row][column].isClicked == true) {
             boardFoundation[row][column].letter = ""
             removeOrSwapTileFromBoard(row, column)
-        }else{      
+        }else if(boardFoundation[row][column].isClicked == true){      
             removeOrSwapTileFromBoard(row, column)
         }
     }
@@ -357,6 +357,28 @@ function doneReplacingBlankTilebuttonFun() {
 }
 
 //check whether tiles are correctly placed and calculate score****************************************
+
+function checkForLRScanBr(shouldCheckBranch, currRow, startleft){
+    if (currRow > 0 && (shouldCheckBranch == true && boardFoundation[currRow][startleft].isClicked == true &&
+        boardFoundation[currRow-1][startleft] !== null)) {
+           storeBranchIndex.push([currRow, startleft]) 
+   }
+   if (currRow < 14 && (shouldCheckBranch == true && boardFoundation[currRow][startleft].isClicked == true &&
+       boardFoundation[currRow+1][startleft] !== null)) {
+          storeBranchIndex.push([currRow, startleft]) 
+  }
+}
+
+function checkForBranchWhileScan(row, currCol, shouldCheckBranch){
+    if (currCol > 0 && (shouldCheckBranch && boardFoundation[row][currCol].isClicked == true && boardFoundation[row][currCol-1] !== null)) {
+        storeBranchIndex.push([row, currCol]) 
+    }
+    if (currCol < 14 && (shouldCheckBranch && boardFoundation[row][currCol].isClicked == true && boardFoundation[row][currCol+1] !== null)) {
+        storeBranchIndex.push([row, currCol]) 
+    }
+}
+
+//scan left right
 function scanLeftRight(startPos, shouldCheckBranch) {
     if (shouldCheckBranch) {
         storeBranchIndex = []
@@ -372,16 +394,13 @@ function scanLeftRight(startPos, shouldCheckBranch) {
     let currRow = startPos[0]
     let currCol = startPos[1]
     
-    if (boardFoundation[currRow][currCol+1] !== null) {
+    if (currCol < 14 && boardFoundation[currRow][currCol+1] !== null) {
         let startright = currCol+1
-        while (boardFoundation[currRow][startright] !== null && startright <= 14) {
+        while (startright <= 14 && boardFoundation[currRow][startright] !== null) {
             right = right + boardFoundation[currRow][startright].letter
             wordObj.point = wordObj.point + boardFoundation[currRow][startright].point
  
-            if (shouldCheckBranch && (boardFoundation[currRow][startright].isClicked == true && (boardFoundation[currRow-1][startright] !== null
-                 || boardFoundation[currRow+1][startright] !== null))) {
-                     storeBranchIndex.push([currRow, startright]) 
-            } 
+            checkForLRScanBr(shouldCheckBranch, currRow, startright)
             
             startright = startright + 1
          }
@@ -389,25 +408,20 @@ function scanLeftRight(startPos, shouldCheckBranch) {
          
     }
 
-    if (boardFoundation[currRow][currCol-1] !== null) {
+    if (currCol > 0 && boardFoundation[currRow][currCol-1] !== null) {
         let startleft = currCol-1
-        while (boardFoundation[currRow][startleft] !== null && startleft >= 0) {
+        while (startleft >= 0 && boardFoundation[currRow][startleft] !== null) {
             left = boardFoundation[currRow][startleft].letter + left
             wordObj.point = wordObj.point + boardFoundation[currRow][startleft].point
- 
-            if (shouldCheckBranch == true && (boardFoundation[currRow][currCol].isClicked == true && (boardFoundation[currRow-1][startleft] !== null
-                 || boardFoundation[currRow+1][startleft] !== null))) {
-                     storeBranchIndex.push([currRow, startleft]) 
-            } 
+
+            checkForLRScanBr(shouldCheckBranch, currRow, startleft)
             
             startleft = startleft - 1
          }
          
     }
 
-    if (shouldCheckBranch == true && (boardFoundation[currRow-1][currCol] !== null || boardFoundation[currRow+1][currCol] !== null)) {
-        storeBranchIndex.push([currRow, currCol])
-    }
+    checkForLRScanBr(shouldCheckBranch, currRow, currCol)
 
     wordObj.word = left + boardFoundation[currRow][currCol].letter + right
     wordObj.point += boardFoundation[currRow][currCol].point
@@ -424,6 +438,8 @@ function scanLeftRight(startPos, shouldCheckBranch) {
     console.log(storeWords)
 }
 
+
+//scan up down
 function scanTopBottom(startPos, shouldCheckBranch) {
     if (shouldCheckBranch) {
         storeBranchIndex = []
@@ -439,47 +455,39 @@ function scanTopBottom(startPos, shouldCheckBranch) {
     let currRow = startPos[0]
     let currCol = startPos[1]
     
-    if (boardFoundation[currRow+1][currCol] !== null) {
+    if (currRow < 14 && (boardFoundation[currRow+1][currCol] !== null)) {
         let startbottom = currRow+1
-        while (boardFoundation[startbottom][currCol] !== null && startbottom <= 14) {
+
+        while (startbottom <= 14 && boardFoundation[startbottom][currCol] !== null) {
             bottom = bottom + boardFoundation[startbottom][currCol].letter
             wordObj.point = wordObj.point + boardFoundation[startbottom][currCol].point
- 
-            if (shouldCheckBranch && (boardFoundation[startbottom][currCol].isClicked == true && (boardFoundation[startbottom][currCol-1] !== null
-                 || boardFoundation[startbottom][currCol+1] !== null))) {
-                     storeBranchIndex.push([startbottom, currCol]) 
-            } 
-            
+
+            checkForBranchWhileScan(startbottom, currCol, shouldCheckBranch)
+
             startbottom = startbottom + 1
          }
     }
 
-    if (boardFoundation[currRow-1][currCol] !== null) {
+    if (currRow > 0 && boardFoundation[currRow-1][currCol] !== null) {
         let startTop = currRow-1
-        while (boardFoundation[startTop][currCol] !== null && startTop >= 0) {
+        while (startTop >= 0 && boardFoundation[startTop][currCol] !== null) {
             top = boardFoundation[startTop][currCol].letter + top
             wordObj.point = wordObj.point + boardFoundation[startTop][currCol].point
- 
-            if ( shouldCheckBranch == true && (boardFoundation[startTop][currCol].isClicked == true && (boardFoundation[startTop][currCol-1] !== null
-                 || boardFoundation[startTop][currCol+1] !== null))) {
-                     storeBranchIndex.push([startTop, currCol]) 
-            } 
+
+            checkForBranchWhileScan(startTop, currCol, shouldCheckBranch)
             
             startTop = startTop - 1
          }
          
     }
-
-    if (shouldCheckBranch == true && (boardFoundation[currRow][currCol-1] !== null || boardFoundation[currRow][currCol+1] !== null)) {
-        storeBranchIndex.push([currRow, currCol])
-    }
+    
+    checkForBranchWhileScan(currRow, currCol, shouldCheckBranch)
 
     wordObj.word = top + boardFoundation[currRow][currCol].letter + bottom
     wordObj.point += boardFoundation[currRow][currCol].point
     storeWords.push(wordObj)
 
     if (storeBranchIndex.length > 0 && shouldCheckBranch) {
-        console.log('why')
         let place
         for (let i = 0; i < storeBranchIndex.length; i++) {
             place = [storeBranchIndex[i][0], storeBranchIndex[i][1]]
@@ -493,7 +501,7 @@ function scanTopBottom(startPos, shouldCheckBranch) {
 
 
 
-//function to scan tile
+//function to know direction to scan tile
 function scanTile(dir, startPos) {
 
     if (dir == 'LR'){
@@ -513,6 +521,24 @@ function scanTile(dir, startPos) {
     }
 }
 
+function checkForBranch(i, j){
+    if (i < 14 && (boardFoundation[i+1][j] !== null && boardFoundation[i+1][j].isClicked == false)) {
+        return true
+    }
+
+    if (i > 0 && (boardFoundation[i-1][j] !== null && boardFoundation[i-1][j].isClicked == false)) {
+        return true
+    }
+
+    if (j < 14 && (boardFoundation[i][j+1] !== null && boardFoundation[i][j+1].isClicked == false)) {
+        return true
+    }
+
+    if (j > 0 && (boardFoundation[i][j-1] !== null && boardFoundation[i][j-1].isClicked == false)) {
+        return true
+    }
+
+}
 
 //check if tile a correctly placed
 function checkTiles() {
@@ -520,30 +546,61 @@ function checkTiles() {
     let direction
     let startScanPos
     let prevIndex = []
+    let isfirstGame = true
+    let isThereBranch = false
 
     for (let i = 0; i < boardFoundation.length; i++) {
         for (let j = 0; j < boardFoundation[i].length; j++) {
+            if (boardFoundation[i][j] !== null && boardFoundation[i][j].isClicked == false) {
+                isfirstGame = false
+            }
             if (direction == 'LR' && boardFoundation[i][j] !== null && boardFoundation[i][j].isClicked == true) {
                 if (j - prevIndex[prevIndex.length-1] !== 1) {
                     return
                 }
+                isThereBranch = checkForBranch(i, j)
                 prevIndex.push(j)
+
             }else if (direction == 'TD' && (boardFoundation[i][j] !== null && boardFoundation[i][j].isClicked == true)) {
                 if (j - prevIndex[prevIndex.length-1] !== 0) {
                     console.log(direction)
                     return
                 }
+
+                isThereBranch = checkForBranch(i, j)
+
                 prevIndex.push(j)
             }
 
             if (boardFoundation[i][j] !== null && boardFoundation[i][j].isClicked == true && isDirection == false) {
-                if (boardFoundation[i][j+1] !== null && boardFoundation[i][j+1].isClicked == true) {
+                if (j < 14 && (boardFoundation[i][j+1] !== null && boardFoundation[i][j+1].isClicked == true)) {
                     direction = 'LR'
+                    isThereBranch = checkForBranch(i, j)
+
                     prevIndex.push(j)
-                }else if (boardFoundation[i+1][j] !== null && boardFoundation[i+1][j].isClicked == true) {
+                }else if (i < 14 && (boardFoundation[i+1][j] !== null && boardFoundation[i+1][j].isClicked == true)) {
                     direction = 'TD'
+                    isThereBranch = checkForBranch(i, j)
+
                     prevIndex.push(j)
+                }else{
+                    if (j < 14 && (boardFoundation[i][j+1] !== null && boardFoundation[i][j+1].isClicked == false)) {
+                        direction = 'LR'
+                        isThereBranch = true
+                    }else if (j > 0 && (boardFoundation[i][j-1] !== null && boardFoundation[i][j-1].isClicked == false)) {
+                        direction = 'LR'
+                        isThereBranch = true
+                    }else if (i < 14 && (boardFoundation[i+1][j] !== null && boardFoundation[i+1][j].isClicked == false)) {
+                        direction = 'TD'
+                        isThereBranch = true
+                    }else if (i > 0 && (boardFoundation[i-1][j] !== null && boardFoundation[i-1][j].isClicked == false)) {
+                        direction = 'TD'
+                        isThereBranch = true
+                    }else{
+                        return
+                    }
                 }
+
                 startScanPos = [i, j]
                 isDirection = true
             }
@@ -553,6 +610,9 @@ function checkTiles() {
     }
     if (startScanPos == null) {
        return 
+    }
+    if (!isfirstGame && !isThereBranch) {
+        return
     }
     scanTile(direction, startScanPos)
 }
