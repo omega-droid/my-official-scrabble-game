@@ -23,7 +23,7 @@ let currentBoardLocation = []
 let uniqueTileNum = 0;
 
 //variable for storing selected index position 
-let indextoreplaceboard
+let indextoreplaceboard = []
 
 let storeWords = []
 
@@ -230,8 +230,8 @@ function CreateReplaceBlankTileInRack(){
     addingTileToReplacementHolder()
 }
 function refreshAndRemoveReplacementTile() {
-    if (indextoreplaceboard !== null) {
-        indextoreplaceboard = null
+    if (indextoreplaceboard.length > 0) {
+        indextoreplaceboard = []
     }
     storeReplacementForBlankTile.forEach(tile => {
         tile.selected = false
@@ -344,7 +344,7 @@ function doneReplacingBlankTilebuttonFun() {
     if (isReplacementTileSelected) {
         racktile[indexOfSelectedTile].letter = storeReplacementForBlankTile[replacingTileIndex].letter
 
-        if(indextoreplaceboard !== null && boardFoundation[indextoreplaceboard[0]][indextoreplaceboard[1]]){
+        if(indextoreplaceboard.length > 0 && boardFoundation[indextoreplaceboard[0]][indextoreplaceboard[1]]){
             swapTile(indextoreplaceboard[0], indextoreplaceboard[1])
             renderTileOnRack()
         }else{
@@ -362,8 +362,7 @@ function checkForLRScanBr(shouldCheckBranch, currRow, startleft){
     if (currRow > 0 && (shouldCheckBranch == true && boardFoundation[currRow][startleft].isClicked == true &&
         boardFoundation[currRow-1][startleft] !== null)) {
            storeBranchIndex.push([currRow, startleft]) 
-   }
-   if (currRow < 14 && (shouldCheckBranch == true && boardFoundation[currRow][startleft].isClicked == true &&
+   }else if (currRow < 14 && (shouldCheckBranch == true && boardFoundation[currRow][startleft].isClicked == true &&
        boardFoundation[currRow+1][startleft] !== null)) {
           storeBranchIndex.push([currRow, startleft]) 
   }
@@ -372,8 +371,7 @@ function checkForLRScanBr(shouldCheckBranch, currRow, startleft){
 function checkForBranchWhileScan(row, currCol, shouldCheckBranch){
     if (currCol > 0 && (shouldCheckBranch && boardFoundation[row][currCol].isClicked == true && boardFoundation[row][currCol-1] !== null)) {
         storeBranchIndex.push([row, currCol]) 
-    }
-    if (currCol < 14 && (shouldCheckBranch && boardFoundation[row][currCol].isClicked == true && boardFoundation[row][currCol+1] !== null)) {
+    }else if (currCol < 14 && (shouldCheckBranch && boardFoundation[row][currCol].isClicked == true && boardFoundation[row][currCol+1] !== null)) {
         storeBranchIndex.push([row, currCol]) 
     }
 }
@@ -537,6 +535,7 @@ function checkForBranch(i, j){
     if (j > 0 && (boardFoundation[i][j-1] !== null && boardFoundation[i][j-1].isClicked == false)) {
         return true
     }
+    return false
 
 }
 
@@ -548,26 +547,58 @@ function checkTiles() {
     let prevIndex = []
     let isfirstGame = true
     let isThereBranch = false
+    let indexGap = []
+    let gapArr = []
 
     for (let i = 0; i < boardFoundation.length; i++) {
         for (let j = 0; j < boardFoundation[i].length; j++) {
             if (boardFoundation[i][j] !== null && boardFoundation[i][j].isClicked == false) {
                 isfirstGame = false
             }
+
+            //check for gap************************************************************
+            if (direction == 'TD' && indexGap.length > 0 && boardFoundation[i][j] !== null
+             && boardFoundation[i][j].isClicked == false) {
+                if (j == indexGap[1]) {
+                    gapArr.push(i)
+                }
+            }
+            
+            if (direction == 'LR' && indexGap.length > 0 && boardFoundation[i][j] !== null
+             && boardFoundation[i][j].isClicked == false) {
+                if (i == indexGap[1]) {
+                    gapArr.push(i)
+                }
+            }
+        
+
             if (direction == 'LR' && boardFoundation[i][j] !== null && boardFoundation[i][j].isClicked == true) {
                 if (j - prevIndex[prevIndex.length-1] !== 1) {
-                    return
+                    console.log(j - (gapArr.length + indexGap[0]));
+                    if (gapArr.length > 0 && i == indexGap[1] && j - (gapArr.length + indexGap[0]) == 1) {
+                       console.log('works')
+                    }else{
+                        return
+                    }
                 }
-                isThereBranch = checkForBranch(i, j)
+                if (!isThereBranch) {
+                    isThereBranch = checkForBranch(i, j)      
+                }
+
                 prevIndex.push(j)
 
             }else if (direction == 'TD' && (boardFoundation[i][j] !== null && boardFoundation[i][j].isClicked == true)) {
                 if (j - prevIndex[prevIndex.length-1] !== 0) {
-                    console.log(direction)
-                    return
+                    if (gapArr.length > 0 && j == indexGap[1] && i - (gapArr.length + indexGap[0]) == 1) {
+                       console.log('works')
+                    }else{
+                        return
+                    }
                 }
 
-                isThereBranch = checkForBranch(i, j)
+                if (!isThereBranch) {
+                    isThereBranch = checkForBranch(i, j)      
+                }
 
                 prevIndex.push(j)
             }
@@ -576,24 +607,26 @@ function checkTiles() {
                 if (j < 14 && (boardFoundation[i][j+1] !== null && boardFoundation[i][j+1].isClicked == true)) {
                     direction = 'LR'
                     isThereBranch = checkForBranch(i, j)
-
                     prevIndex.push(j)
                 }else if (i < 14 && (boardFoundation[i+1][j] !== null && boardFoundation[i+1][j].isClicked == true)) {
                     direction = 'TD'
                     isThereBranch = checkForBranch(i, j)
-
                     prevIndex.push(j)
                 }else{
                     if (j < 14 && (boardFoundation[i][j+1] !== null && boardFoundation[i][j+1].isClicked == false)) {
+                        indexGap = [j, i]
                         direction = 'LR'
                         isThereBranch = true
                     }else if (j > 0 && (boardFoundation[i][j-1] !== null && boardFoundation[i][j-1].isClicked == false)) {
+                        indexGap = [j, i]
                         direction = 'LR'
                         isThereBranch = true
                     }else if (i < 14 && (boardFoundation[i+1][j] !== null && boardFoundation[i+1][j].isClicked == false)) {
+                        indexGap = [i, j]
                         direction = 'TD'
                         isThereBranch = true
                     }else if (i > 0 && (boardFoundation[i-1][j] !== null && boardFoundation[i-1][j].isClicked == false)) {
+                        indexGap = [i, j]
                         direction = 'TD'
                         isThereBranch = true
                     }else{
@@ -608,9 +641,13 @@ function checkTiles() {
         }
         
     }
+    console.log(direction)
+
     if (startScanPos == null) {
        return 
     }
+    console.log(isThereBranch)
+    console.log('whu')
     if (!isfirstGame && !isThereBranch) {
         return
     }
